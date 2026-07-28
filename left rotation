@@ -1,0 +1,4 @@
+vector<int> rotateLeft(int d, vector<int> arr) {
+    rotate(arr.begin(), arr.begin() + d, arr.end());
+    return arr;
+}
