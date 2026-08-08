@@ -1,0 +1,117 @@
+/*
+The issue is here:
+
+    int sentence_count = 1;
+
+If the paragraph ends with '.', this counts one extra empty
+sentence. For example:
+
+    Learning C is fun.
+
+There is only ONE sentence, not TWO.
+
+Use this corrected get_document().
+*/
+
+struct document get_document(char* text) {
+    struct document Doc;
+
+    /* Count paragraphs */
+    int paragraph_count = 1;
+
+    for (int i = 0; text[i] != '\0'; i++) {
+        if (text[i] == '\n')
+            paragraph_count++;
+    }
+
+    Doc.paragraph_count = paragraph_count;
+    Doc.data = malloc(paragraph_count * sizeof(struct paragraph));
+
+    char *p_save;
+    char *paragraph_str = strtok_r(text, "\n", &p_save);
+
+    int p = 0;
+
+    while (paragraph_str != NULL) {
+
+        /* Count sentences */
+        int sentence_count = 0;
+
+        for (int i = 0; paragraph_str[i] != '\0'; i++) {
+            if (paragraph_str[i] == '.')
+                sentence_count++;
+        }
+
+        Doc.data[p].sentence_count = sentence_count;
+
+        Doc.data[p].data =
+            malloc(sentence_count * sizeof(struct sentence));
+
+        char *s_save;
+        char *sentence_str = strtok_r(paragraph_str, ".", &s_save);
+
+        int s = 0;
+
+        while (sentence_str != NULL) {
+
+            /* Count words */
+            int word_count = 1;
+
+            for (int i = 0; sentence_str[i] != '\0'; i++) {
+                if (sentence_str[i] == ' ')
+                    word_count++;
+            }
+
+            Doc.data[p].data[s].word_count = word_count;
+
+            Doc.data[p].data[s].data =
+                malloc(word_count * sizeof(struct word));
+
+            char *w_save;
+            char *word_str = strtok_r(sentence_str, " ", &w_save);
+
+            int w = 0;
+
+            while (word_str != NULL) {
+
+                Doc.data[p].data[s].data[w].data =
+                    malloc(strlen(word_str) + 1);
+
+                strcpy(
+                    Doc.data[p].data[s].data[w].data,
+                    word_str
+                );
+
+                w++;
+                word_str = strtok_r(NULL, " ", &w_save);
+            }
+
+            s++;
+            sentence_str = strtok_r(NULL, ".", &s_save);
+        }
+
+        p++;
+        paragraph_str = strtok_r(NULL, "\n", &p_save);
+    }
+
+    return Doc;
+}
+
+
+struct word kth_word_in_mth_sentence_of_nth_paragraph(
+    struct document Doc, int k, int m, int n
+) {
+    return Doc.data[n - 1].data[m - 1].data[k - 1];
+}
+
+
+struct sentence kth_sentence_in_mth_paragraph(
+    struct document Doc, int k, int m
+) {
+    return Doc.data[m - 1].data[k - 1];
+}
+
+
+struct paragraph kth_paragraph(struct document Doc, int k) {
+    return Doc.data[k - 1];
+}
